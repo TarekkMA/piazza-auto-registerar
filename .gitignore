@@ -58,3 +58,5 @@ typings/
 .env
 
 accounts.json
+facebook_token.txt
+names.json

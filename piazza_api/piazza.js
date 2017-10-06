@@ -1,4 +1,4 @@
-let request = require('request');
+let request = require('request').defaults({jar: true});
 let faker = require('faker');
 let fs = require('fs');
 let accounts;
@@ -11,8 +11,12 @@ function readFile(callback) {
     });
 }
 
-function writeFile(){
-    fs.writeFile(__dirname + "/accounts.json", JSON.stringify(accounts), function (err) {
+function writeFile(extrnal_aacounts) {
+    let data;
+    if (extrnal_aacounts === undefined) data = accounts;
+    else data = extrnal_aacounts;
+
+    fs.writeFile(__dirname + "/accounts.json", JSON.stringify(data), function (err) {
         if (err) {
             return console.log(err);
         }
@@ -28,22 +32,22 @@ function addBadAccountToFile(mail) {
     writeFile();
 }
 
-function addVerifaiedEmail(email,password,name,code){
+function addVerifaiedEmail(email, password, name, code) {
     accounts[email] = {
         ours: true,
         code: code,
         name: name,
         pass: password,
-        verifaied: true      
+        verifaied: true
     }
     writeFile();
 }
 
-function addUnverifaiedEmail(email,code){
+function addUnverifaiedEmail(email, code) {
     accounts[email] = {
         ours: true,
         code: code,
-        verifaied: false      
+        verifaied: false
     }
     writeFile();
 }
@@ -119,7 +123,7 @@ function requestVerifcationCode(email, callback) {
 }
 
 function registerStudent(email, code, callback) {
-    readFile(()=>{
+    readFile(() => {
         const password = faker.internet.password(10);
         const name = faker.name.findName();
         const body = {
@@ -147,20 +151,84 @@ function registerStudent(email, code, callback) {
                 let parsedBody = JSON.parse(body);
                 if (!parsedBody.result == "OK,OK" || !parsedBody.error) {
                     console.log("Email registared");
-                    addVerifaiedEmail(email,password,name,code);
+                    addVerifaiedEmail(email, password, name, code);
                     callback(true);
-                }else{
-                    console.log("Error ",body);
-                    callback(false);                
+                } else {
+                    console.log("Error ", body);
+                    callback(false);
                 }
             } else {
-                console.log("Error ",error);
-                callback(false);            
+                console.log("Error ", error);
+                callback(false);
             }
         });
     })
 }
 
+
+function authAccount(email, password, callback) {
+    request.post({
+            url: "https://piazza.com/logic/api?method=user.login",
+            body: JSON.stringify({
+                method: "user.login",
+                params: {
+                    email: email,
+                    pass: password
+                }
+            })
+        },
+        function (error, response, body) {
+            if (!error) {
+                let parsedBody = JSON.parse(body);
+                if (!parsedBody.result == "OK" || !parsedBody.error) {
+                    console.log("Auth Complete");
+                    callback(parsedBody.aid);
+                } else {
+                    console.log("Auth Faild ", body);
+                    callback(false);
+                }
+            } else {
+                console.log("Can't Auth ", error);
+                callback(false);
+            }
+        }
+    )
+}
+
+function renameAccount(name, email, token, callback) {
+    request.post({
+            url: 'https://piazza.com/logic/api?method=user.update&aid=' + token,
+            body: JSON.stringify({
+                method: "user.update",
+                params: {
+                    email: email,
+                    name: name
+                }
+            })
+        },
+        function (error, response, body) {
+            if (!error) {
+                let parsedBody = JSON.parse(body);
+                if (!parsedBody.error) {
+                    console.log("Renamed");
+                    callback(true);
+                } else {
+                    console.log("Didn't rename ", body);
+                    callback(false);
+                }
+            } else {
+                console.log("Faild to rename ", error);
+                callback(false);
+            }
+        });
+}
+
 module.exports.checkIfNewEmail = checkIfNewEmail;
 module.exports.registerStudent = registerStudent;
 module.exports.requestVerifcationCode = requestVerifcationCode;
+module.exports.authAccount = authAccount;
+module.exports.renameAccount = renameAccount;
+module.exports.writeFile = writeFile;
+module.exports.getEmails = (callback) => readFile(() => {
+    callback(accounts)
+});
