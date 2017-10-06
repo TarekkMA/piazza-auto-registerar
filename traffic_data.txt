@@ -1,0 +1,29 @@
+
+Enroll to course
+url : https://piazza.com/main/api
+payload :
+{"method":"network.verify_class_access_codes","params":{"codes":{"j640gw1jigu160":"cse116-1st"}}}
+
+response : { "aid":"j8f1etgeX9f", "result": {"invalid_codes":[]}, "error": null, "need_refresh" : "" }
+
+Enter Email
+url : "https://piazza.com/logic/api?method=generic.event_to_requests"
+payload : 
+{"method":"generic.event_to_requests","params":{"event":"student.add_classes_added","num_classes":1,"email":"zecuhufawo@p33.org"}}
+response : {"result":"OK","error":null,"aid":"j8f1im70c9kp"}
+
+url : https://piazza.com/logic/api?method=network.join&aid=j8f1im73sqkp
+payload : {"method":"network.join","params":{"email":"zecuhufawo@p33.org","nids":["j640gw1jigu160"],"nids_ta":[],"nids_prof":[],"codes":{"j640gw1jigu160":"cse116-1st"}}}:
+response : {"result":"NEED_REG","error":null,"aid":"j8f1im73sqkp"}
+
+url : https://piazza.com/logic/api?method=log.add_if_new&aid=j8f1im74mps8
+payload : {"method":"log.add_if_new","params":{"nid":"","stats":{"add_classes.join_existing":0,"add_classes.join_added":1,"add_classes.join_auto_complete":1},"email":"zecuhufawo@p33.org"}}
+response : {"result":"OK","error":null,"aid":"j8f1im74mps8"}
+
+verify : https://piazza.com/main/api
+payload : {"method":"user.verify_primary_email","params":{"email":"sadas@p33.org","token":"IMSuxzXW3Oc"}}
+response : { "aid":"j8f2xf4beWS", "result": "OK", "error": null, "need_refresh" : "" }
+
+register : https://piazza.com/logic/api?method=user.first_update&aid=j8f32qhgkfbp
+payload : {"method":"user.first_update","params":{"token":"IMSuxzXW3Oc","name":"1234","email":"sadas@p33.org","pass":"123456","opt_in":true,"opt_in_type":"2","page_version":"L_tail","careers_toggles":{"careers_insights":true,"companies_campus":true,"companies_message":true}}}
+result : {"result":"OK,OK","error":null,"aid":"j8f32qhgkfbp"}
