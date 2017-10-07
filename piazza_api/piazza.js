@@ -122,10 +122,40 @@ function requestVerifcationCode(email, callback) {
     });
 }
 
-function registerStudent(email, code, callback) {
+function joinCourse(email, callback) {
+    readFile(function () {
+        request.post({
+            url: 'https://piazza.com/logic/api?method=network.join',
+            body: JSON.stringify({
+                method: "network.join",
+                params: {
+                    email: email,
+                    nids: ["j640gw1jigu160"],
+                    nids_ta: [],
+                    nids_prof: [],
+                    codes: {
+                        j640gw1jigu160: "cse116-1st"
+                    }
+                }
+            })
+        }, function (error, response, body) {
+            let parsedBody = JSON.parse(body);
+            if (!parsedBody.error) {
+                callback(true);
+                console.log("Joined",parsedBody.result);
+            } else {
+                console.log("Didn't Join", body);
+                callback(false);
+            }
+        });
+    });
+}
+
+
+
+function registerStudent(email,name, code, callback) {
     readFile(() => {
         const password = faker.internet.password(10);
-        const name = faker.name.findName();
         const body = {
             method: "user.first_update",
             params: {
@@ -227,6 +257,7 @@ module.exports.checkIfNewEmail = checkIfNewEmail;
 module.exports.registerStudent = registerStudent;
 module.exports.requestVerifcationCode = requestVerifcationCode;
 module.exports.authAccount = authAccount;
+module.exports.joinCourse = joinCourse;
 module.exports.renameAccount = renameAccount;
 module.exports.writeFile = writeFile;
 module.exports.getEmails = (callback) => readFile(() => {
